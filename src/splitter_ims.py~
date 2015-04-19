@@ -428,39 +428,6 @@ class Splitter_IMS(threading.Thread):
 
         # }}}
 
-
-    def listen_a_video_source(self):
-        # {{{ When a video stream is received, the source is replaced by this stream.
-
-        source_socket_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            # This does not work in Windows systems !!
-            source_socket_in.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        except:
-            pass
-        source_socket_in.bind(('', self.SOURCE_PORT_IN))
-        source_socket_in.listen(1)
-
-        while (1):
-            if (self.mode == 0):
-                self.source_socket_in, addr = source_socket_in.accept()
-                print ('IMS: A new source is connected in:', addr)
-
-                data = self.source_socket_in.recv(1024)
-                print ('IMS: Pass from source:', data)
-                print ('IMS: Right pass:', self.SOURCE_PASS)
-
-                if (data == self.SOURCE_PASS):
-                    print ('IMS: correct password!')
-                    self.mode = 1
-                else:
-                    print ('IMS: wrong password')
-                    self.mode = 0
-                    self.source_socket_in.close()
-
-        # }}}
-
-
     def run(self):
         # {{{
 
@@ -469,7 +436,6 @@ class Splitter_IMS(threading.Thread):
         print(self.peer_connection_socket.getsockname(), "\b: IMS: waiting for a peer ...")
         self.handle_a_peer_arrival(self.peer_connection_socket.accept())
         threading.Thread(target=self.handle_arrivals).start()
-	threading.Thread(target=self.listen_a_video_source).start()
 
         message_format = self.chunk_number_format + str(self.CHUNK_SIZE) + "s"
         
